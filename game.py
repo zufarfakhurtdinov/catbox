@@ -1,23 +1,21 @@
 class CatBoxGame:
     def __init__(self, box_count=5):
-        self.BOX_COUNT = box_count
-        self.boxes = [True] * self.BOX_COUNT
+        self.box_count = box_count
+        self.boxes = [True] * self.box_count
         self.turns_count = 0
         self.game_over = False
 
     def initialize_game(self):
         """Initialize the game by placing cats in all boxes"""
-        self.boxes = [True] * self.BOX_COUNT  # All boxes contain cats
+        self.boxes = [True] * self.box_count  # All boxes contain cats
         self.turns_count = 0
         self.game_over = False   
         print("Game initialized! Cats are hiding in all boxes.")
         print("Click on boxes to find the cats!")
 
-    def jump(self, from_box, to_box):
+    def jumpAnimation(self, from_box, to_box):
         """Move a cat from one box to another adjacent box"""
         if abs(from_box - to_box) == 1:
-            self.boxes[from_box] = False
-            self.boxes[to_box] = True
             print(f"Cat jumped from box {from_box} to box {to_box}")
         else:
             print(f"Error: Cat can only jump to adjacent boxes")
@@ -26,7 +24,7 @@ class CatBoxGame:
         possible_jumps = []
         if from_box > 0:
             possible_jumps.append(from_box - 1)
-        if from_box < self.BOX_COUNT - 1:
+        if from_box < self.box_count - 1:
             possible_jumps.append(from_box + 1)
         return possible_jumps
 
@@ -42,15 +40,15 @@ class CatBoxGame:
         self.turns_count += 1
         print(f"Checking box {box}...")
 
-        new_boxes = [False] * self.BOX_COUNT
-        for box_index in range(self.BOX_COUNT):
+        self.boxes[box] = False
+        new_boxes = [False] * self.box_count
+        for box_index in range(self.box_count):
             if self.boxes[box_index]:
                 for jump_to in self.get_possible_jumps(box_index):
-                    self.jump(box_index, jump_to)
+                    self.jumpAnimation(box_index, jump_to)
                     new_boxes[jump_to] = True
 
         self.boxes = new_boxes
-        self.boxes[box] = False
         if not any(self.boxes):
             self.victory()
             self.game_over = True
