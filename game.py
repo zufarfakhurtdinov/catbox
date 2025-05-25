@@ -1,76 +1,75 @@
-# Game state
-BOX_COUNT = 5
-boxes = [True] * BOX_COUNT
-turns_count = 0
-game_over = False
+class CatBoxGame:
+    def __init__(self, box_count=5):
+        self.BOX_COUNT = box_count
+        self.boxes = [True] * self.BOX_COUNT
+        self.turns_count = 0
+        self.game_over = False
 
-def initialize_game():
-    """Initialize the game by placing cats in all boxes"""
-    global boxes, turns_count, game_over
-    boxes = [True] * BOX_COUNT  # All boxes contain cats
-    turns_count = 0
-    game_over = False
-    
-    print("Game initialized! Cats are hiding in all boxes.")
-    print("Click on boxes to find the cats!")
+    def initialize_game(self):
+        """Initialize the game by placing cats in all boxes"""
+        self.boxes = [True] * self.BOX_COUNT  # All boxes contain cats
+        self.turns_count = 0
+        self.game_over = False   
+        print("Game initialized! Cats are hiding in all boxes.")
+        print("Click on boxes to find the cats!")
 
-def jump(from_box, to_box):
-    """Move a cat from one box to another adjacent box"""
-    global boxes
-    
-    if abs(from_box - to_box) == 1:
-        print(f"Cat jumped from box {from_box} to box {to_box}")
-    else:
-        print(f"Error: Cat can only jump to adjacent boxes")
+    def jump(self, from_box, to_box):
+        """Move a cat from one box to another adjacent box"""
+        if abs(from_box - to_box) == 1:
+            self.boxes[from_box] = False
+            self.boxes[to_box] = True
+            print(f"Cat jumped from box {from_box} to box {to_box}")
+        else:
+            print(f"Error: Cat can only jump to adjacent boxes")
 
-def get_possible_jumps(from_box):
-    possible_jumps = []
-    if from_box > 0:
-        possible_jumps.append(from_box - 1)
-    if from_box < BOX_COUNT - 1:
-        possible_jumps.append(from_box + 1)
-    return possible_jumps
+    def get_possible_jumps(self, from_box):
+        possible_jumps = []
+        if from_box > 0:
+            possible_jumps.append(from_box - 1)
+        if from_box < self.BOX_COUNT - 1:
+            possible_jumps.append(from_box + 1)
+        return possible_jumps
 
-def victory():
-    print(f"Congratulations! You found the cat in {turns_count} turns!")
+    def victory(self):
+        print(f"Congratulations! You found the cat in {self.turns_count} turns!")
 
-def onBoxClick(box):
-    """Handle player clicking on a box"""
-    global turns_count, boxes, game_over
-    
-    if game_over:
-        print("Game is already over! Initialize a new game to play again.")
-        return
-    
-    turns_count += 1
-    print(f"Checking box {box}...")
+    def on_box_click(self, box):
+        """Handle player clicking on a box"""
+        if self.game_over:
+            print("Game is already over! Initialize a new game to play again.")
+            return
+        
+        self.turns_count += 1
+        print(f"Checking box {box}...")
 
-    newBoxes = [False] * BOX_COUNT
-    for box_index in range(BOX_COUNT):
-        if boxes[box_index]:
-            for jump_to in get_possible_jumps(box_index):
-                jump(box_index, jump_to)
-                newBoxes[jump_to] = True
+        new_boxes = [False] * self.BOX_COUNT
+        for box_index in range(self.BOX_COUNT):
+            if self.boxes[box_index]:
+                for jump_to in self.get_possible_jumps(box_index):
+                    self.jump(box_index, jump_to)
+                    new_boxes[jump_to] = True
 
-    boxes = newBoxes
-    boxes[box] = False
-    if not any(boxes):
-        victory()
-        game_over = True
-    print(f"Debug - Current box states: {boxes}")
+        self.boxes = new_boxes
+        self.boxes[box] = False
+        if not any(self.boxes):
+            self.victory()
+            self.game_over = True
+        print(f"Debug - Current box states: {self.boxes}")
 
-# Start the game when the script runs
+# Example usage
 if __name__ == "__main__":
-    initialize_game()
+    game = CatBoxGame()
+    game.initialize_game()
     
-    # Example of how to use the game:
     print("\nExample usage:")
-    print("To check a box, call: onBoxClick(box_index)")
+    print("To check a box, call: game.on_box_click(box_index)")
     print("Box indices are 0-4 (representing boxes 1-5)")
-    print("Example: onBoxClick(0) checks the first box")
-    onBoxClick(1)
-    onBoxClick(2)
-    onBoxClick(3)
-    onBoxClick(1)
-    onBoxClick(2)
-    onBoxClick(3)
+    print("Example: game.on_box_click(0) checks the first box")
+    
+    # Example game sequence
+    game.on_box_click(1)
+    game.on_box_click(2)
+    game.on_box_click(3)
+    game.on_box_click(1)
+    game.on_box_click(2)
+    game.on_box_click(3)
