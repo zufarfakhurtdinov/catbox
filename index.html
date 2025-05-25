@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Box Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .boxes-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 3px solid #333;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .box.has-cat {
+            background: linear-gradient(145deg, #ffeb3b, #ffc107);
+            animation: pulse 2s infinite;
+        }
+
+        .box.checked {
+            background: linear-gradient(145deg, #e0e0e0, #bdbdbd);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 4px 20px rgba(255, 193, 7, 0.6); }
+            100% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+        }
+
+        @keyframes jump {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        .box.jumping {
+            animation: jump 0.5s ease-in-out;
+        }
+
+        .game-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .turns-counter {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .game-status {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            min-height: 25px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 0 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .victory-message {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .box-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🐱 Cat Box Game</h1>
+        <p class="subtitle">Find all the hiding cats!</p>
+        
+        <div class="game-info">
+            <div class="turns-counter">Turns: <span id="turns">0</span></div>
+            <div class="game-status" id="status">Cats are hiding in all boxes. Click on boxes to find them!</div>
+        </div>
+
+        <div class="boxes-container" id="boxes-container">
+            <!-- Boxes will be generated by JavaScript -->
+        </div>
+
+        <div class="controls">
+            <button onclick="initializeGame()">New Game</button>
+            <button onclick="showDebugInfo()">Debug Info</button>
+        </div>
+
+        <div class="instructions">
+            <strong>How to play:</strong><br>
+            • Cats start hiding in all boxes<br>
+            • When you click a box, cats jump to adjacent boxes<br>
+            • Find all cats to win the game!<br>
+            • Try to win in as few turns as possible
+        </div>
+    </div>
+
+    <script>
+        class CatBoxGame {
+            constructor(boxCount = 5) {
+                this.boxCount = boxCount;
+                this.boxes = new Array(this.boxCount).fill(true);
+                this.turnsCount = 0;
+                this.gameOver = false;
+            }
+
+            initializeGame() {
+                // Initialize the game by placing cats in all boxes
+                this.boxes = new Array(this.boxCount).fill(true); // All boxes contain cats
+                this.turnsCount = 0;
+                this.gameOver = false;
+                this.updateDisplay();
+                this.updateStatus("Game initialized! Cats are hiding in all boxes. Click on boxes to find the cats!");
+            }
+
+            jumpAnimation(fromBox, toBox) {
+                // Move a cat from one box to another adjacent box
+                if (Math.abs(fromBox - toBox) === 1) {
+                    console.log(`Cat jumped from box ${fromBox} to box ${toBox}`);
+                    // Add visual jump animation
+                    const boxElement = document.getElementById(`box-${toBox}`);
+                    if (boxElement) {
+                        boxElement.classList.add('jumping');
+                        setTimeout(() => {
+                            boxElement.classList.remove('jumping');
+                        }, 500);
+                    }
+                } else {
+                    console.log("Error: Cat can only jump to adjacent boxes");
+                }
+            }
+
+            getPossibleJumps(fromBox) {
+                const possibleJumps = [];
+                if (fromBox > 0) {
+                    possibleJumps.push(fromBox - 1);
+                }
+                if (fromBox < this.boxCount - 1) {
+                    possibleJumps.push(fromBox + 1);
+                }
+                return possibleJumps;
+            }
+
+            victory() {
+                console.log(`Congratulations! You found the cat in ${this.turnsCount} turns!`);
+                this.updateStatus(`🎉 Congratulations! You found all cats in ${this.turnsCount} turns!`);
+                document.getElementById('status').innerHTML = `
+                    <div class="victory-message">
+                        🎉 Congratulations! You found all cats in ${this.turnsCount} turns!
+                    </div>
+                `;
+            }
+
+            onBoxClick(box) {
+                // Handle player clicking on a box
+                if (this.gameOver) {
+                    this.updateStatus("Game is already over! Click 'New Game' to play again.");
+                    return;
+                }
+
+                this.turnsCount++;
+                console.log(`Checking box ${box}...`);
+                this.updateStatus(`Checking box ${box + 1}...`);
+
+                this.boxes[box] = false;
+                const newBoxes = new Array(this.boxCount).fill(false);
+                
+                for (let boxIndex = 0; boxIndex < this.boxCount; boxIndex++) {
+                    if (this.boxes[boxIndex]) {
+                        const possibleJumps = this.getPossibleJumps(boxIndex);
+                        for (const jumpTo of possibleJumps) {
+                            this.jumpAnimation(boxIndex, jumpTo);
+                            newBoxes[jumpTo] = true;
+                        }
+                    }
+                }
+
+                this.boxes = newBoxes;
+                
+                if (!this.boxes.some(box => box)) {
+                    this.victory();
+                    this.gameOver = true;
+                } else {
+                    setTimeout(() => {
+                        this.updateStatus("Cats jumped to adjacent boxes! Keep looking...");
+                    }, 600);
+                }
+                
+                console.log(`Debug - Current box states: ${this.boxes}`);
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                // Update the visual representation of boxes
+                for (let i = 0; i < this.boxCount; i++) {
+                    const boxElement = document.getElementById(`box-${i}`);
+                    if (boxElement) {
+                        boxElement.className = 'box';
+                        if (this.boxes[i]) {
+                            boxElement.classList.add('has-cat');
+                            boxElement.innerHTML = '🐱';
+                        } else {
+                            boxElement.innerHTML = '📦';
+                        }
+                    }
+                }
+                
+                // Update turns counter
+                document.getElementById('turns').textContent = this.turnsCount;
+            }
+
+            updateStatus(message) {
+                document.getElementById('status').textContent = message;
+            }
+        }
+
+        // Global game instance
+        let game;
+
+        // Initialize the game when page loads
+        window.onload = function() {
+            game = new CatBoxGame();
+            createBoxes();
+            initializeGame();
+        };
+
+        function createBoxes() {
+            const container = document.getElementById('boxes-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < game.boxCount; i++) {
+                const box = document.createElement('div');
+                box.className = 'box';
+                box.id = `box-${i}`;
+                box.onclick = () => handleBoxClick(i);
+                
+                const label = document.createElement('div');
+                label.className = 'box-label';
+                label.textContent = `Box ${i + 1}`;
+                box.appendChild(label);
+                
+                container.appendChild(box);
+            }
+        }
+
+        function handleBoxClick(boxIndex) {
+            game.onBoxClick(boxIndex);
+        }
+
+        function initializeGame() {
+            game.initializeGame();
+        }
+
+        function showDebugInfo() {
+            const debugInfo = `
+Box States: ${game.boxes.map((hasCat, index) => `Box ${index + 1}: ${hasCat ? 'Cat' : 'Empty'}`).join(', ')}
+Turns: ${game.turnsCount}
+Game Over: ${game.gameOver}
+            `;
+            alert(debugInfo);
+        }
+    </script>
+</body>
+</html> 
